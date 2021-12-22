@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "./v2";
+
+package api.v2;
+
+message PingRequest {
+  int32 ID = 1;
+}
+
+message PingResponse {
+  string Phrase = 1;
+}
+
+service Ping {
+  rpc Ping(PingRequest) returns (PingResponse) {}
+}

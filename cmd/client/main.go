@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	apiv2 "github.com/melan/grpc/pkg/api/v2"
 
 	apiv1 "github.com/melan/grpc/pkg/api/v1"
 	"golang.org/x/oauth2"
@@ -17,6 +18,7 @@ var (
 	port  = flag.Int("port", 50051, "Server port")
 	cert  = flag.String("cert", "cert.pem", "Server cert")
 	name  = flag.String("name", "foo", "Name to send to the server")
+	id    = flag.Int("id", 100, "id for the request")
 	token = flag.String("token", "", "Security token")
 )
 
@@ -45,11 +47,17 @@ func main() {
 		panic(fmt.Sprintf("can't call GRPC server: %s", err))
 	}
 
-	client := apiv1.NewPingClient(conn)
-	response, err := client.Ping(context.TODO(), &apiv1.PingRequest{Name: *name})
-	if err != nil {
-		panic(fmt.Sprintf("failed to call GRPC server: %s", err))
+	clientV1 := apiv1.NewPingClient(conn)
+	if response, err := clientV1.Ping(context.TODO(), &apiv1.PingRequest{Name: *name}); err != nil {
+		panic(fmt.Sprintf("failed to call v1 GRPC server: %s", err))
+	} else {
+		fmt.Printf("Response from the v1 server: %s\n", response.Phrase)
 	}
 
-	fmt.Printf("Response from the server: %s\n", response.Phrase)
+	clientV2 := apiv2.NewPingClient(conn)
+	if response, err := clientV2.Ping(context.TODO(), &apiv2.PingRequest{ID: int32(*id)}); err != nil {
+		panic(fmt.Sprintf("failed to call v2 GRPC server: %s", err))
+	} else {
+		fmt.Printf("Response from the v2 server: %s\n", response.Phrase)
+	}
 }

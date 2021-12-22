@@ -9,6 +9,7 @@ import (
 
 	"github.com/melan/grpc/internal/server"
 	apiv1 "github.com/melan/grpc/pkg/api/v1"
+	apiv2 "github.com/melan/grpc/pkg/api/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -56,7 +57,8 @@ func main() {
 		panic(fmt.Sprintf("can't start listener on the port %d: %s", *port, err))
 	}
 
-	s := &server.PingServer{}
+	sv1 := &server.V1PingServer{}
+	sv2 := &server.V2PingServer{}
 
 	var opts []grpc.ServerOption
 
@@ -71,7 +73,8 @@ func main() {
 	}
 
 	grpcS := grpc.NewServer(opts...)
-	apiv1.RegisterPingServer(grpcS, s)
+	apiv1.RegisterPingServer(grpcS, sv1)
+	apiv2.RegisterPingServer(grpcS, sv2)
 
 	if err := grpcS.Serve(listener); err != nil {
 		panic(fmt.Sprintf("can't start GRPC server: %s", err))
