@@ -8,8 +8,10 @@ import (
 	"strings"
 
 	"github.com/melan/grpc/internal/server"
+	"github.com/melan/grpc/internal/util"
 	apiv1 "github.com/melan/grpc/pkg/api/v1"
 	apiv2 "github.com/melan/grpc/pkg/api/v2"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -20,6 +22,7 @@ import (
 var (
 	port  = flag.Int("port", 50051, "The server port")
 	token = flag.String("token", "", "Security token")
+	limit = flag.Int("limit", 10, "Requests limit")
 
 	key  = flag.String("key", "key.pem", "Private key file")
 	cert = flag.String("cert", "cert.pem", "Public cert file")
@@ -28,7 +31,7 @@ var (
 	errInvalidToken    = status.Errorf(codes.Unauthenticated, "invalid token")
 )
 
-func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, errMissingMetadata
@@ -62,6 +65,8 @@ func main() {
 
 	var opts []grpc.ServerOption
 
+	grpc.EnableTracing = true
+
 	if token != nil && *token != "" {
 		creds, err := credentials.NewServerTLSFromFile(*cert, *key)
 		if err != nil {
@@ -69,10 +74,19 @@ func main() {
 		}
 		opts = append(opts, grpc.Creds(creds))
 
-		opts = append(opts, grpc.UnaryInterceptor(authInterceptor))
+		limiter := rate.NewLimiter(rate.Limit(*limit), *limit)
+		fmt.Printf("server will be limeted to %d calls per second\n", *limit)
+
+		opts = append(opts,
+			grpc.ChainUnaryInterceptor(
+				util.NewWaitLimiter(limiter),
+				authInterceptor,
+			),
+		)
 	}
 
 	grpcS := grpc.NewServer(opts...)
+
 	apiv1.RegisterPingServer(grpcS, sv1)
 	apiv2.RegisterPingServer(grpcS, sv2)
 

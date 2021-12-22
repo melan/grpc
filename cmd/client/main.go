@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	apiv2 "github.com/melan/grpc/pkg/api/v2"
+	"time"
 
 	apiv1 "github.com/melan/grpc/pkg/api/v1"
 	"golang.org/x/oauth2"
@@ -51,13 +52,13 @@ func main() {
 	if response, err := clientV1.Ping(context.TODO(), &apiv1.PingRequest{Name: *name}); err != nil {
 		panic(fmt.Sprintf("failed to call v1 GRPC server: %s", err))
 	} else {
-		fmt.Printf("Response from the v1 server: %s\n", response.Phrase)
+		fmt.Printf("%s Response from the v1 server: %s\n", time.Now().Format(time.RFC3339Nano), response.Phrase)
 	}
 
 	clientV2 := apiv2.NewPingClient(conn)
 	if response, err := clientV2.Ping(context.TODO(), &apiv2.PingRequest{ID: int32(*id)}); err != nil {
 		panic(fmt.Sprintf("failed to call v2 GRPC server: %s", err))
 	} else {
-		fmt.Printf("Response from the v2 server: %s\n", response.Phrase)
+		fmt.Printf("%s Response from the v2 server: %s\n", time.Now().Format(time.RFC3339Nano), response.Phrase)
 	}
 }

@@ -34,6 +34,9 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
+# golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11
+## explicit
+golang.org/x/time/rate
 # google.golang.org/appengine v1.4.0
 ## explicit
 google.golang.org/appengine
