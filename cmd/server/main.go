@@ -4,14 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"google.golang.org/grpc/credentials"
 	"net"
 	"strings"
 
 	"github.com/melan/grpc/internal/server"
-	"github.com/melan/grpc/pkg/api"
+	apiv1 "github.com/melan/grpc/pkg/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
@@ -71,7 +71,7 @@ func main() {
 	}
 
 	grpcS := grpc.NewServer(opts...)
-	api.RegisterPingServer(grpcS, s)
+	apiv1.RegisterPingServer(grpcS, s)
 
 	if err := grpcS.Serve(listener); err != nil {
 		panic(fmt.Sprintf("can't start GRPC server: %s", err))

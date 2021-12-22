@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/melan/grpc/pkg/api"
+	apiv1 "github.com/melan/grpc/pkg/api/v1"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -45,8 +45,8 @@ func main() {
 		panic(fmt.Sprintf("can't call GRPC server: %s", err))
 	}
 
-	client := api.NewPingClient(conn)
-	response, err := client.Ping(context.TODO(), &api.PingRequest{Name: *name})
+	client := apiv1.NewPingClient(conn)
+	response, err := client.Ping(context.TODO(), &apiv1.PingRequest{Name: *name})
 	if err != nil {
 		panic(fmt.Sprintf("failed to call GRPC server: %s", err))
 	}
