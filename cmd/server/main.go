@@ -79,7 +79,7 @@ func main() {
 
 		opts = append(opts,
 			grpc.ChainUnaryInterceptor(
-				util.NewWaitLimiter(limiter),
+				util.NewErrorLimiter(limiter),
 				authInterceptor,
 			),
 		)
